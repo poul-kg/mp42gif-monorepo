@@ -1,4 +1,6 @@
 # Setup
+* `git clone git@github.com:poul-kg/mp42gif-monorepo.git`
+* `cd mp42gif-monorepo`
 * `npm install`
 
 ## To serve angular & express locally
