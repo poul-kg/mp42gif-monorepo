@@ -19,11 +19,12 @@ export class AppComponent {
   isDone = false;
   progress = 0;
   errorMsg = '';
+  isInvalidFile = false;
 
   constructor(private http: HttpClient) {
   }
 
-  onFileSelected(event: Event): void {
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
@@ -33,6 +34,21 @@ export class AppComponent {
     this.progress = 0;
     this.isDone = false;
     this.convertedGifUrl = '';
+    this.errorMsg = '';
+    this.isInvalidFile = false;
+
+    if (this.selectedFile) {
+      try {
+        await this.validateVideo(this.selectedFile);
+      } catch (errMsg) {
+        this.isInvalidFile = true;
+        if (typeof errMsg === 'string') {
+          this.errorMsg = errMsg;
+        } else {
+          this.errorMsg = 'Unknown video file error';
+        }
+      }
+    }
   }
 
   onUpload(): void {
@@ -80,5 +96,49 @@ export class AppComponent {
       link.download = this.selectedFileName.replace(/\.mp4/gi, '.gif');
       link.click();
     }
+  }
+
+  // Function to validate the uploaded video
+  validateVideo(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Check if the file type is MP4
+      if (file.type !== 'video/mp4') {
+        return reject('File must be an MP4 video.');
+      }
+
+      // Create a video element to load the file
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      // Load the video file
+      video.src = URL.createObjectURL(file);
+      video.onloadedmetadata = () => {
+        // Get video dimensions and duration
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+        const duration = video.duration;
+
+        // Release the object URL
+        URL.revokeObjectURL(video.src);
+
+        // Check video resolution
+        if (width > 1024 || height > 768) {
+          return reject(`Video resolution must not exceed 1024x768. Given file is: ${width}x${height}`);
+        }
+
+        // Check video duration
+        if (duration > 10) {
+          return reject(`Video duration must not exceed 10 seconds. Given file is ${duration} sec`);
+        }
+
+        // If all checks pass, resolve the promise
+        resolve('Video is valid.');
+      };
+
+      // Handle any error during video loading
+      video.onerror = () => {
+        reject('Failed to load video. Please ensure the file is a valid MP4.');
+      };
+    });
   }
 }

@@ -31,8 +31,8 @@ services:
           - node.role == manager
       resources:
         limits:
-          cpus: "0.5"
-          memory: "512M"
+          cpus: "2.5"
+          memory: "1024M"
       restart_policy:
         condition: on-failure
 

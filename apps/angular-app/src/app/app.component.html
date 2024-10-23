@@ -1,7 +1,7 @@
 <div class="container">
     <h1>MP4 to GIF Converter</h1>
     <input type="file" (change)="onFileSelected($event)" accept="video/mp4"/>
-    <button (click)="onUpload()" [disabled]="!selectedFile || isLoading">Upload</button>
+    <button (click)="onUpload()" [disabled]="!selectedFile || isLoading || isInvalidFile">Upload</button>
     @if(isLoading) {
         <div>
             <p>Uploading: {{ progress }}%</p>
@@ -13,7 +13,7 @@
         </div>
     }
     @if(errorMsg) {
-        <div>
+        <div class="err-msg">
             <p>{{errorMsg}}</p>
         </div>
     }

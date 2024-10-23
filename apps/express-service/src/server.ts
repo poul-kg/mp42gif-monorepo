@@ -1,9 +1,10 @@
-import express, { Request, Response, RequestHandler } from 'express';
+import express, { Request, RequestHandler, Response } from 'express';
 import multer, { FileFilterCallback } from 'multer';
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
 const port = 3000;
@@ -32,7 +33,7 @@ const convertHandler: RequestHandler = (req: Request, res: Response): void => {
   }
 
   const filePath = req.file.path;
-  const outputFilePath = path.join('outputs', `${Date.now()}.gif`);
+  const outputFilePath = path.join('outputs', `${uuidv4()}.gif`);
 
   // Convert MP4 to GIF using ffmpeg
   ffmpeg(filePath)
@@ -63,6 +64,12 @@ const convertHandler: RequestHandler = (req: Request, res: Response): void => {
 
 // Route to handle file upload and conversion
 app.post('/convert', upload.single('video'), convertHandler);
+
+// Status route, for testing
+app.get('/status', (req, res) => {
+  console.log('Status request');
+  res.status(200).send('OK');
+});
 
 // Start the Express server
 app.listen(port, () => {

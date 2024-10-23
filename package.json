@@ -11,14 +11,25 @@
     "serve-angular": "ng serve --project angular-app",
     "serve-express": "esr apps/express-service/src/server.ts",
     "build-angular": "ng build --project angular-app",
-    "build-express": "npm run build --workspace=apps/express-service"
+    "build-express": "npm run build --workspace=apps/express-service",
+    "cy:open": "cypress open --config-file cypress.config.ts",
+    "cy:run": "cypress run --config-file cypress.config.ts"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.3.10",
     "@angular/cli": "^17.3.2",
+    "@cypress/webpack-preprocessor": "^6.0.2",
+    "@types/node": "^22.7.9",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.7.7",
     "concurrently": "^8.0.0",
+    "cypress": "^13.15.0",
+    "cypress-file-upload": "^5.0.8",
     "esbuild": "^0.24.0",
     "esbuild-runner": "^2.2.2",
-    "typescript": "~5.4.2"
+    "form-data": "^4.0.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "~5.4.2",
+    "uuid": "^10.0.0"
   }
 }
