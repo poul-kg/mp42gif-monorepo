@@ -29,6 +29,7 @@
 
 ## Deploy stack in swarm mode
 * `docker swarm init` if swarm was not initialized yet
+* `docker network create --driver overlay frontend-backend` run this once on first setup
 * `docker stack rm mp42gif-stack`
 * `docker stack deploy -c docker-compose-swarm.yml mp42gif-stack`
 * `npm run cy:run` to run load testing
