@@ -14,8 +14,9 @@
     "build-express": "tsc -p apps/express-service/tsconfig.json"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "^17.3.10",
+    "@angular/cli": "^17.3.2",
     "concurrently": "^8.0.0",
-    "typescript": "^5.0.0",
-    "@angular/cli": "^17.3.2"
+    "typescript": "~5.4.2"
   }
 }
