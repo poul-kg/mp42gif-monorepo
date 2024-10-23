@@ -1,0 +1,21 @@
+{
+  "name": "mp42gif-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "start": "concurrently \"npm:serve-angular\" \"npm:serve-express\"",
+    "serve-angular": "ng serve --project angular-app",
+    "serve-express": "ts-node apps/express-service/src/server.ts",
+    "build-angular": "ng build --project angular-app",
+    "build-express": "tsc -p apps/express-service/tsconfig.json"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@angular/cli": "^17.3.2"
+  }
+}
