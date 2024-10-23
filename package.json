@@ -9,14 +9,16 @@
   "scripts": {
     "start": "concurrently \"npm:serve-angular\" \"npm:serve-express\"",
     "serve-angular": "ng serve --project angular-app",
-    "serve-express": "ts-node apps/express-service/src/server.ts",
+    "serve-express": "esr apps/express-service/src/server.ts",
     "build-angular": "ng build --project angular-app",
-    "build-express": "tsc -p apps/express-service/tsconfig.json"
+    "build-express": "npm run build --workspace=apps/express-service"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.3.10",
     "@angular/cli": "^17.3.2",
     "concurrently": "^8.0.0",
+    "esbuild": "^0.24.0",
+    "esbuild-runner": "^2.2.2",
     "typescript": "~5.4.2"
   }
 }
