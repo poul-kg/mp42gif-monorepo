@@ -10,11 +10,10 @@ import { HttpClient, HttpClientModule, HttpEventType } from '@angular/common/htt
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'mp42gif-web';
   selectedFile: File | null = null;
   selectedFileName = '';
   convertedGifUrl: string | null = null;
-  isLoading = false;
+  isUploading = false;
   isConverting = false;
   isDone = false;
   progress = 0;
@@ -29,7 +28,7 @@ export class AppComponent {
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
     }
-    this.isLoading = false;
+    this.isUploading = false;
     this.isConverting = false;
     this.progress = 0;
     this.isDone = false;
@@ -61,7 +60,7 @@ export class AppComponent {
     const formData = new FormData();
     formData.append('video', this.selectedFile);
 
-    this.isLoading = true;
+    this.isUploading = true;
     this.progress = 0;
     this.http.post('http://127.0.0.1:3000/convert', formData, {
       responseType: 'blob',
@@ -74,7 +73,7 @@ export class AppComponent {
             this.isConverting = true;
           }
         } else if (event.type === HttpEventType.Response) {
-          this.isLoading = false;
+          this.isUploading = false;
           const blob = new Blob([event.body!], { type: 'image/gif' });
           this.convertedGifUrl = URL.createObjectURL(blob);
           this.isConverting = false;
@@ -83,8 +82,26 @@ export class AppComponent {
       },
       (err) => {
         console.error('Upload error:', err);
-        this.isLoading = false;
-        this.errorMsg = err.message;
+        this.isUploading = false;
+        this.isConverting = false;
+        if (err.error instanceof Blob) {
+          // If the error is a Blob, read it as text
+          const reader = new FileReader();
+          reader.onload = () => {
+            const errorText = reader.result as string;
+            this.errorMsg = errorText || 'An unknown error occurred';
+            console.error('Upload error:', this.errorMsg);
+          };
+          reader.onerror = () => {
+            this.errorMsg = 'Failed to read error message';
+            console.error('Upload error:', this.errorMsg);
+          };
+          reader.readAsText(err.error);
+        } else {
+          // If it's not a Blob, just use the error message
+          this.errorMsg = err.message;
+          console.error('Upload error:', this.errorMsg);
+        }
       },
     );
   }

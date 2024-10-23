@@ -12,6 +12,10 @@ const port = 3000;
 // Enable CORS for all origins
 app.use(cors());
 
+function hasMessage(err: any): err is { message: string } {
+  return !!err && 'message' in err;
+}
+
 // Configure Multer for file upload handling
 const upload = multer({
   dest: 'uploads/', // Folder where uploaded files are stored temporarily
@@ -25,8 +29,51 @@ const upload = multer({
   },
 });
 
+// wrap ffprobe into async func
+function ffprobeAsync(filePath: string): Promise<ffmpeg.FfprobeData> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(metadata);
+      }
+    });
+  });
+}
+
+async function validateVideo(filePath: string): Promise<string> {
+  const metadata = await ffprobeAsync(filePath);
+  const { width, height } = metadata.streams[0];
+  const duration = metadata.format.duration;
+
+  if (!width) {
+    throw new Error('Unable to get video width');
+  }
+
+  if (!height) {
+    throw new Error('Unable to get video height');
+  }
+
+  if (!duration) {
+    throw new Error('Unable to get video duration');
+  }
+
+  // Check video resolution
+  if (width > 1024 || height > 768) {
+    throw new Error('Video resolution must not exceed 1024x768.');
+  }
+
+  // Check video duration
+  if (duration > 10) {
+    throw new Error('Video duration must not exceed 10 seconds.');
+  }
+
+  return 'Video is valid and can be processed.';
+}
+
 // Define the route handler type using RequestHandler
-const convertHandler: RequestHandler = (req: Request, res: Response): void => {
+const convertHandler: RequestHandler = async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
     res.status(400).send('No file uploaded.');
     return;
@@ -34,6 +81,18 @@ const convertHandler: RequestHandler = (req: Request, res: Response): void => {
 
   const filePath = req.file.path;
   const outputFilePath = path.join('outputs', `${uuidv4()}.gif`);
+
+  try {
+    await validateVideo(filePath);
+  } catch (error) {
+    if (hasMessage(error)) {
+      res.status(400).send(error.message);
+    } else {
+      console.log(error);
+      res.status(400).send('Unknown server error');
+    }
+    return;
+  }
 
   // Convert MP4 to GIF using ffmpeg
   ffmpeg(filePath)
